@@ -1,4 +1,4 @@
-﻿namespace YourClientName
+﻿namespace DysBot
 
 open ScrabbleUtil
 open ScrabbleUtil.ServerCommunication

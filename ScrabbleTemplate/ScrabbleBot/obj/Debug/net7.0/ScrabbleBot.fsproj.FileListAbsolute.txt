@@ -1,0 +1,14 @@
+C:\Users\Kaare\Documents\Programming Projects\ScrabbleProject\DysfunctionalProgramming\ScrabbleTemplate\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.fsproj.AssemblyReference.cache
+C:\Users\Kaare\Documents\Programming Projects\ScrabbleProject\DysfunctionalProgramming\ScrabbleTemplate\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.AssemblyInfoInputs.cache
+C:\Users\Kaare\Documents\Programming Projects\ScrabbleProject\DysfunctionalProgramming\ScrabbleTemplate\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.AssemblyInfo.fs
+C:\Users\Kaare\Documents\Programming Projects\ScrabbleProject\DysfunctionalProgramming\ScrabbleTemplate\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.fsproj.CoreCompileInputs.cache
+C:\Users\Kaare\Documents\Programming Projects\ScrabbleProject\DysfunctionalProgramming\ScrabbleTemplate\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.sourcelink.json
+C:\Users\Kaare\Documents\Programming Projects\ScrabbleProject\DysfunctionalProgramming\ScrabbleTemplate\ScrabbleBot\bin\Debug\net7.0\ScrabbleBot.deps.json
+C:\Users\Kaare\Documents\Programming Projects\ScrabbleProject\DysfunctionalProgramming\ScrabbleTemplate\ScrabbleBot\bin\Debug\net7.0\ScrabbleBot.dll
+C:\Users\Kaare\Documents\Programming Projects\ScrabbleProject\DysfunctionalProgramming\ScrabbleTemplate\ScrabbleBot\bin\Debug\net7.0\ScrabbleBot.pdb
+C:\Users\Kaare\Documents\Programming Projects\ScrabbleProject\DysfunctionalProgramming\ScrabbleTemplate\ScrabbleBot\bin\Debug\net7.0\ScrabbleUtil.dll
+C:\Users\Kaare\Documents\Programming Projects\ScrabbleProject\DysfunctionalProgramming\ScrabbleTemplate\ScrabbleBot\obj\Debug\net7.0\Scrabble.3728C117.Up2Date
+C:\Users\Kaare\Documents\Programming Projects\ScrabbleProject\DysfunctionalProgramming\ScrabbleTemplate\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.dll
+C:\Users\Kaare\Documents\Programming Projects\ScrabbleProject\DysfunctionalProgramming\ScrabbleTemplate\ScrabbleBot\obj\Debug\net7.0\refint\ScrabbleBot.dll
+C:\Users\Kaare\Documents\Programming Projects\ScrabbleProject\DysfunctionalProgramming\ScrabbleTemplate\ScrabbleBot\obj\Debug\net7.0\ScrabbleBot.pdb
+C:\Users\Kaare\Documents\Programming Projects\ScrabbleProject\DysfunctionalProgramming\ScrabbleTemplate\ScrabbleBot\obj\Debug\net7.0\ref\ScrabbleBot.dll
