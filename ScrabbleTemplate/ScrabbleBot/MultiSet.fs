@@ -42,7 +42,10 @@ module MultiSet
 
     let map (_ : 'a -> 'b) (_ : MultiSet<'a>) : MultiSet<'b> = M Map.empty
 
-    let union (_ : MultiSet<'a>) (_ : MultiSet<'a>) : MultiSet<'a> = M Map.empty
+    let union (a : MultiSet<'a>) (b : MultiSet<'a>) : MultiSet<'a> =
+        let f (k : 'a) (v : uint32) (acc : MultiSet<'a>) =
+            add k v acc
+        foldBack f a b
     let sum (_ : MultiSet<'a>) (_ : MultiSet<'a>) : MultiSet<'a> = M Map.empty
 
     let subtract (_ : MultiSet<'a>) (_ : MultiSet<'a>) : MultiSet<'a> = M Map.empty

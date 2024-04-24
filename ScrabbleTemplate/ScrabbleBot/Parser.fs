@@ -103,19 +103,19 @@
 
     let BexpParse = pstring "not implemented"
 
-    let SFirst = createParserForwardedToRef<stm>()
+    //let SFirst = createParserForwardedToRef<stm>()
 
-    let stmntParse = SFirst
+    //let stmntParse = SFirst
 
 
-    let parseSquareProg (sqp: Map<int, string>) = 
+    (* let parseSquareProg (sqp: Map<int, string>) = 
         sqp 
-        |> Map.map (fun _ p -> (stmntToSquareFun (getSuccess(run stmntParse p))))
+        |> Map.map (fun _ p -> (stmntToSquareFun (getSuccess(run stmntParse p)))) *)
 
-    let parseBoardProg s (sqs: Map<int, square>) = 
-        stmntToBoardFun (getSuccess(run stmntParse s)) sqs
+    (* let parseBoardProg s (sqs: Map<int, square>) = 
+        stmntToBoardFun (getSuccess(run stmntParse s)) sqs *)
 
-    let mkBoard (bp : boardProg) : board =
+    (* let mkBoard (bp : boardProg) : board =
         let squaresMap = bp.squares
         let squares = Map.map (fun _ squareProg -> parseSquareProg squareProg) squaresMap
         let defaultSquare = Map.find bp.usedSquare squaresMap
@@ -123,7 +123,9 @@
             center = bp.center
             defaultSquare = parseSquareProg defaultSquare
             squares = parseBoardProg bp.prog squares 
-        }
+        } *)
+
+    let mkBoard : boardProg -> board = fun _ -> {center = (0,0); defaultSquare = Map.empty; squares = fun _ -> Success (Some Map.empty)}
 
     
 
