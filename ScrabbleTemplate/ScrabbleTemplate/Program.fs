@@ -35,7 +35,11 @@ let main argv =
 //    let board      = ScrabbleUtil.HoleBoard.holeBoard ()
 //    let board      = ScrabbleUtil.InfiniteHoleBoard.infiniteHoleBoard ()
 
-    let words     = readLines "C:\Users\Kaare\Documents\Programming Projects\ScrabbleProject\DysfunctionalProgramming\ScrabbleTemplate\ScrabbleTemplate\Dictionaries\English.txt"
+    //let baseDirectory = System.AppDomain.CurrentDomain.BaseDirectory
+    //let relativePath = System.IO.Path.Combine([| baseDirectory; "ScrabbleTemplate"; "ScrabbleTemplate"; "Dictionaries"; "English.txt" |])
+    //let words = System.IO.File.ReadLines(relativePath)
+
+    let words     = readLines "Dictionaries\English.txt"
 
     let handSize   = 7u
     let timeout    = None
@@ -52,7 +56,7 @@ let main argv =
     let (dictionary, time) =
         time (fun () -> ScrabbleUtil.Dictionary.mkDict words dictAPI)
     
-    let players = [("Dysfunctional Bot", dictionary, DysBot.Scrabble.startGame)]
+    let players = [("Dysfunctional Bot 1", dictionary, DysBot.Scrabble.startGame); ("Dysfunctional Bot 1", dictionary, DysBot.Scrabble.startGame)]
 
     //let players = spawnMultiples "OxyphenButazone" dictionary Oxyphenbutazone.Scrabble.startGame 2
 

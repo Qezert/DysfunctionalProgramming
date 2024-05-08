@@ -1,27 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Kaare\\Documents\\Programming Projects\\ScrabbleProject\\DysfunctionalProgramming\\ScrabbleTemplate\\ScrabbleBot\\ScrabbleBot.fsproj": {}
+    "C:\\Users\\Kaare\\Documents\\Programming Projects\\DysfunctionalProgramming\\ScrabbleTemplate\\ScrabbleBot\\ScrabbleBot.fsproj": {}
   },
   "projects": {
-    "C:\\Users\\Kaare\\Documents\\Programming Projects\\ScrabbleProject\\DysfunctionalProgramming\\ScrabbleTemplate\\ScrabbleBot\\ScrabbleBot.fsproj": {
+    "C:\\Users\\Kaare\\Documents\\Programming Projects\\DysfunctionalProgramming\\ScrabbleTemplate\\ScrabbleBot\\ScrabbleBot.fsproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Kaare\\Documents\\Programming Projects\\ScrabbleProject\\DysfunctionalProgramming\\ScrabbleTemplate\\ScrabbleBot\\ScrabbleBot.fsproj",
+        "projectUniqueName": "C:\\Users\\Kaare\\Documents\\Programming Projects\\DysfunctionalProgramming\\ScrabbleTemplate\\ScrabbleBot\\ScrabbleBot.fsproj",
         "projectName": "ScrabbleBot",
-        "projectPath": "C:\\Users\\Kaare\\Documents\\Programming Projects\\ScrabbleProject\\DysfunctionalProgramming\\ScrabbleTemplate\\ScrabbleBot\\ScrabbleBot.fsproj",
+        "projectPath": "C:\\Users\\Kaare\\Documents\\Programming Projects\\DysfunctionalProgramming\\ScrabbleTemplate\\ScrabbleBot\\ScrabbleBot.fsproj",
         "packagesPath": "C:\\Users\\Kaare\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Kaare\\Documents\\Programming Projects\\ScrabbleProject\\DysfunctionalProgramming\\ScrabbleTemplate\\ScrabbleBot\\obj\\",
+        "outputPath": "C:\\Users\\Kaare\\Documents\\Programming Projects\\DysfunctionalProgramming\\ScrabbleTemplate\\ScrabbleBot\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Kaare\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Kaare\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net7.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "C:\\Program Files\\dotnet\\sdk\\8.0.201\\FSharp\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
@@ -64,6 +62,20 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[7.0.16, 7.0.16]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[7.0.16, 7.0.16]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[7.0.16, 7.0.16]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "isINBtekYmTgkSeOYPfk/C1ftB91qiH+IoJk652Gm08sxuQKou4po10nB9GiFGtyzi0HeBNbVz5eSowcqrLAWw==",
+  "dgSpecHash": "ouniKo43oYUagbHAECIxGwFad/RFvcGL3GispwOut+hN8BTpEP2M3y6WqPuoancD2+2PayAbgl5zmM4JSO6dtA==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Kaare\\Documents\\Programming Projects\\ScrabbleProject\\DysfunctionalProgramming\\ScrabbleTemplate\\ScrabbleTemplate\\ScrabbleTemplate.fsproj",
+  "projectFilePath": "C:\\Users\\Kaare\\Documents\\Programming Projects\\DysfunctionalProgramming\\ScrabbleTemplate\\ScrabbleTemplate\\ScrabbleTemplate.fsproj",
   "expectedPackageFiles": [
     "C:\\Users\\Kaare\\.nuget\\packages\\fparsec\\1.1.1\\fparsec.1.1.1.nupkg.sha512",
     "C:\\Users\\Kaare\\.nuget\\packages\\fsharp.core\\7.0.200\\fsharp.core.7.0.200.nupkg.sha512",
@@ -17,7 +17,11 @@
     "C:\\Users\\Kaare\\.nuget\\packages\\system.reflection.primitives\\4.3.0\\system.reflection.primitives.4.3.0.nupkg.sha512",
     "C:\\Users\\Kaare\\.nuget\\packages\\system.runtime\\4.3.0\\system.runtime.4.3.0.nupkg.sha512",
     "C:\\Users\\Kaare\\.nuget\\packages\\system.text.encoding\\4.3.0\\system.text.encoding.4.3.0.nupkg.sha512",
-    "C:\\Users\\Kaare\\.nuget\\packages\\system.threading.tasks\\4.3.0\\system.threading.tasks.4.3.0.nupkg.sha512"
+    "C:\\Users\\Kaare\\.nuget\\packages\\system.threading.tasks\\4.3.0\\system.threading.tasks.4.3.0.nupkg.sha512",
+    "C:\\Users\\Kaare\\.nuget\\packages\\microsoft.netcore.app.ref\\7.0.16\\microsoft.netcore.app.ref.7.0.16.nupkg.sha512",
+    "C:\\Users\\Kaare\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\7.0.16\\microsoft.windowsdesktop.app.ref.7.0.16.nupkg.sha512",
+    "C:\\Users\\Kaare\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\7.0.16\\microsoft.aspnetcore.app.ref.7.0.16.nupkg.sha512",
+    "C:\\Users\\Kaare\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\7.0.16\\microsoft.netcore.app.host.win-x64.7.0.16.nupkg.sha512"
   ],
   "logs": []
 }

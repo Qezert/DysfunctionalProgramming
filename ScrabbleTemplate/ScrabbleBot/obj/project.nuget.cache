@@ -1,11 +1,14 @@
 {
   "version": 2,
-  "dgSpecHash": "QH/4rwrYkARocS9pEwhQ7/Quucpn1unlDD08VedCBReCKpVbkZ8U+ZUloPJM6KW2ndrulaBMo6lv6jAENDnuRA==",
+  "dgSpecHash": "5JrvoieYYSbDqUajWl5qXCxLIY/hqkbeScqbZw78Ph7bVf/eZ7e7wGuqHd4uzF5Evni0wxTIY0OwpzRzAUqmeQ==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Kaare\\Documents\\Programming Projects\\ScrabbleProject\\DysfunctionalProgramming\\ScrabbleTemplate\\ScrabbleBot\\ScrabbleBot.fsproj",
+  "projectFilePath": "C:\\Users\\Kaare\\Documents\\Programming Projects\\DysfunctionalProgramming\\ScrabbleTemplate\\ScrabbleBot\\ScrabbleBot.fsproj",
   "expectedPackageFiles": [
     "C:\\Users\\Kaare\\.nuget\\packages\\fparsec\\1.1.1\\fparsec.1.1.1.nupkg.sha512",
-    "C:\\Users\\Kaare\\.nuget\\packages\\fsharp.core\\7.0.200\\fsharp.core.7.0.200.nupkg.sha512"
+    "C:\\Users\\Kaare\\.nuget\\packages\\fsharp.core\\7.0.200\\fsharp.core.7.0.200.nupkg.sha512",
+    "C:\\Users\\Kaare\\.nuget\\packages\\microsoft.netcore.app.ref\\7.0.16\\microsoft.netcore.app.ref.7.0.16.nupkg.sha512",
+    "C:\\Users\\Kaare\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\7.0.16\\microsoft.windowsdesktop.app.ref.7.0.16.nupkg.sha512",
+    "C:\\Users\\Kaare\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\7.0.16\\microsoft.aspnetcore.app.ref.7.0.16.nupkg.sha512"
   ],
   "logs": []
 }

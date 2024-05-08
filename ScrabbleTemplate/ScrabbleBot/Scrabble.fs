@@ -44,16 +44,20 @@ module State =
     type state = {
         board         : Parser.board
         dict          : ScrabbleUtil.Dictionary.Dict
+        numPlayers    : uint32
         playerNumber  : uint32
+        playerTurn    : uint32
         hand          : MultiSet.MultiSet<uint32>
     }
 
-    let mkState b d pn h = {board = b; dict = d;  playerNumber = pn; hand = h }
+    let mkState b d pn h num pt = {board = b; dict = d;  playerNumber = pn; hand = h; numPlayers = num; playerTurn = pt}
 
     let board st         = st.board
     let dict st          = st.dict
     let playerNumber st  = st.playerNumber
     let hand st          = st.hand
+    let numPlayers st    = st.numPlayers
+    let playerTurn st    = st.playerTurn
 
 module Scrabble =
     open System.Threading
@@ -61,18 +65,31 @@ module Scrabble =
     let playGame cstream pieces (st : State.state) =
 
         let rec aux (st : State.state) =
-            Print.printHand pieces (State.hand st)
+            
+
+            //sleep for 1 second
+            Thread.Sleep(1000)
+
+            debugPrint (sprintf "Player %d thinks there are %d players in the game\n" (State.playerNumber st) (State.numPlayers st))
+
+            debugPrint (sprintf "Player %d thinks it's Player %d's turn\n" (State.playerNumber st) (State.playerTurn st))
+
 
             // remove the force print when you move on from manual input (or when you have learnt the format)
-            forcePrint "Input move (format '(<x-coordinate> <y-coordinate> <piece id><character><point-value> )*', note the absence of space between the last inputs)\n\n"
-            let input =  System.Console.ReadLine()
-            let move = RegEx.parseMove input
+            //forcePrint "Input move (format '(<x-coordinate> <y-coordinate> <piece id><character><point-value> )*', note the absence of space between the last inputs)\n\n"
+            if State.playerTurn st = State.playerNumber st
+            then 
+                //Print.printHand pieces (State.hand st)
+                let input = System.Console.ReadLine();
+                let move = RegEx.parseMove input;
+                send cstream (SMPlay move)
+                //send cstream SMPass
+                debugPrint (sprintf "Player %d made a move\n" (State.playerNumber st))
 
-            debugPrint (sprintf "Player %d -> Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
-            send cstream (SMPlay move)
+            //debugPrint (sprintf "Player %d -> Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
 
             let msg = recv cstream
-            debugPrint (sprintf "Player %d <- Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
+            //debugPrint (sprintf "Player %d <- Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
 
             match msg with
             | RCM (CMPlaySuccess(ms, points, newPieces)) ->
@@ -85,19 +102,60 @@ module Scrabble =
                         // Add new pieces
                         |> MultiSet.union NewPiecesMS 
                     { st with hand = updatedHand }
+                    let updatedTurn =
+                        match State.playerTurn st with
+                        | n when n = State.numPlayers st -> 1u
+                        | _ -> State.playerTurn st + 1u
+                    { st with playerTurn = updatedTurn }
                 aux st'
             | RCM (CMPlayed (pid, ms, points)) ->
                 (* Successful play by other player. Update your state *)
-                let st' = st // This state needs to be updated
+                let st' =
+                    let updatedTurn =
+                        match State.playerTurn st with
+                        | n when n = State.numPlayers st -> 1u
+                        | _ -> State.playerTurn st + 1u
+                    { st with playerTurn = updatedTurn }
+
                 aux st'
             | RCM (CMPlayFailed (pid, ms)) ->
                 (* Failed play. Update your state *)
-                let st' = st // This state needs to be updated
-                aux st'
-            | RCM (CMGameOver _) -> ()
-            | RCM a -> failwith (sprintf "not implmented: %A" a)
-            | RGPE err -> printfn "Gameplay Error:\n%A" err; aux st
+                let st' =
+                    let updatedTurn =
+                        match State.playerTurn st with
+                        | n when n = State.numPlayers st -> 1u
+                        | _ -> State.playerTurn st + 1u
+                    { st with playerTurn = updatedTurn }
 
+                aux st'
+            | RCM (CMPassed (pid)) ->
+                (* Player passed. Update your state *)
+                let st' =
+                    let updatedTurn =
+                        match State.playerTurn st with
+                        | n when n = State.numPlayers st -> 1u
+                        | _ -> State.playerTurn st + 1u
+                    { st with playerTurn = updatedTurn }
+
+                aux st'
+            | RCM (CMGameOver _) ->
+                // Game over. Do nothing and return
+                let st' =
+                    let updatedTurn = 0u
+                    { st with playerTurn = updatedTurn }
+
+                ()
+            | RCM a -> failwith (sprintf "not implmented: %A" a)
+            | RGPE err -> 
+                printfn "Gameplay Error:\n%A" err
+                let st' =
+                    let updatedTurn =
+                        match State.playerTurn st with
+                        | n when n = State.numPlayers st -> 1u
+                        | _ -> State.playerTurn st + 1u
+                    { st with playerTurn = updatedTurn }
+                
+                aux st'
 
         aux st
 
@@ -125,5 +183,5 @@ module Scrabble =
                   
         let handSet = List.fold (fun acc (x, k) -> MultiSet.add x k acc) MultiSet.empty hand
 
-        fun () -> playGame cstream tiles (State.mkState board dict playerNumber handSet)
+        fun () -> playGame cstream tiles (State.mkState board dict playerNumber handSet numPlayers playerTurn)
         
