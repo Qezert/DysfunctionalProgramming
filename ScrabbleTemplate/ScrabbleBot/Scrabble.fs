@@ -2,9 +2,7 @@
 
 open ScrabbleUtil
 open ScrabbleUtil.ServerCommunication
-
 open System.IO
-
 open ScrabbleUtil.DebugPrint
 
 // The RegEx module is only used to parse human input. It is not used for the final product.
@@ -29,7 +27,7 @@ module RegEx =
                 | _ -> failwith "Failed (should never happen)") |>
         Seq.toList
 
- module Print =
+module Print =
 
     let printHand pieces hand =
         hand |>
@@ -48,9 +46,10 @@ module State =
         playerNumber  : uint32
         playerTurn    : uint32
         hand          : MultiSet.MultiSet<uint32>
+        piecesOnBoard : Map<coord, (char * int)>
     }
 
-    let mkState b d pn h num pt = {board = b; dict = d;  playerNumber = pn; hand = h; numPlayers = num; playerTurn = pt}
+    let mkState b d pn h num pt = {board = b; dict = d;  playerNumber = pn; hand = h; numPlayers = num; playerTurn = pt; piecesOnBoard = Map.empty}
 
     let board st         = st.board
     let dict st          = st.dict
@@ -58,9 +57,16 @@ module State =
     let hand st          = st.hand
     let numPlayers st    = st.numPlayers
     let playerTurn st    = st.playerTurn
+    let piecesOnBoard st = st.piecesOnBoard
+
+    let nextTurn st numPlayers =
+        match st.playerTurn with
+        | n when n = numPlayers -> 1u
+        | _ -> st.playerTurn + 1u
 
 module Scrabble =
     open System.Threading
+    open State
 
     let playGame cstream pieces (st : State.state) =
 
@@ -75,6 +81,17 @@ module Scrabble =
             debugPrint (sprintf "Player %d thinks it's Player %d's turn\n" (State.playerNumber st) (State.playerTurn st))
 
 
+            if (st.playerTurn = st.playerNumber) then
+                if (isFreshBoard) then
+                    let wordToPlay =
+                        parseBotMove
+
+
+
+
+
+
+            (*
             // remove the force print when you move on from manual input (or when you have learnt the format)
             //forcePrint "Input move (format '(<x-coordinate> <y-coordinate> <piece id><character><point-value> )*', note the absence of space between the last inputs)\n\n"
             if State.playerTurn st = State.playerNumber st
@@ -87,6 +104,7 @@ module Scrabble =
                 debugPrint (sprintf "Player %d made a move\n" (State.playerNumber st))
 
             //debugPrint (sprintf "Player %d -> Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
+            *)
 
             let msg = recv cstream
             //debugPrint (sprintf "Player %d <- Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
@@ -99,61 +117,57 @@ module Scrabble =
                     let updatedHand =
                         ms
                         |> List.fold (fun acc (coord, (id, (char, point))) -> MultiSet.removeSingle id acc) st.hand // Remove old tiles
-                        // Add new pieces
-                        |> MultiSet.union NewPiecesMS 
-                    { st with hand = updatedHand }
-                    let updatedTurn =
-                        match State.playerTurn st with
-                        | n when n = State.numPlayers st -> 1u
-                        | _ -> State.playerTurn st + 1u
-                    { st with playerTurn = updatedTurn }
+                        |> MultiSet.union NewPiecesMS                                                               // Add new pieces
+                    {
+                    st with 
+                        playerTurn = nextTurn st st.numPlayers
+                        hand = updatedHand
+                    }
                 aux st'
             | RCM (CMPlayed (pid, ms, points)) ->
                 (* Successful play by other player. Update your state *)
                 let st' =
-                    let updatedTurn =
-                        match State.playerTurn st with
-                        | n when n = State.numPlayers st -> 1u
-                        | _ -> State.playerTurn st + 1u
-                    { st with playerTurn = updatedTurn }
+                    {
+                    st with 
+                        playerTurn = nextTurn st st.numPlayers
+                    }
 
                 aux st'
             | RCM (CMPlayFailed (pid, ms)) ->
                 (* Failed play. Update your state *)
                 let st' =
-                    let updatedTurn =
-                        match State.playerTurn st with
-                        | n when n = State.numPlayers st -> 1u
-                        | _ -> State.playerTurn st + 1u
-                    { st with playerTurn = updatedTurn }
+                    {
+                    st with 
+                        playerTurn = nextTurn st st.numPlayers
+                    }
 
                 aux st'
             | RCM (CMPassed (pid)) ->
                 (* Player passed. Update your state *)
                 let st' =
-                    let updatedTurn =
-                        match State.playerTurn st with
-                        | n when n = State.numPlayers st -> 1u
-                        | _ -> State.playerTurn st + 1u
-                    { st with playerTurn = updatedTurn }
+                    {
+                    st with 
+                        playerTurn = nextTurn st st.numPlayers
+                    }
 
                 aux st'
             | RCM (CMGameOver _) ->
                 // Game over. Do nothing and return
                 let st' =
-                    let updatedTurn = 0u
-                    { st with playerTurn = updatedTurn }
+                    let gameOver = 0u
+                    { 
+                    st with playerTurn = gameOver 
+                    }
 
                 ()
             | RCM a -> failwith (sprintf "not implmented: %A" a)
             | RGPE err -> 
                 printfn "Gameplay Error:\n%A" err
                 let st' =
-                    let updatedTurn =
-                        match State.playerTurn st with
-                        | n when n = State.numPlayers st -> 1u
-                        | _ -> State.playerTurn st + 1u
-                    { st with playerTurn = updatedTurn }
+                    let gameOver = 0u
+                    { 
+                    st with playerTurn = gameOver 
+                    }
                 
                 aux st'
 
