@@ -55,6 +55,7 @@ module State =
         match st.playerTurn with
         | n when n = numPlayers -> 1u
         | _ -> st.playerTurn + 1u
+        
 module Scrabble =
     open System.Threading
     open State
@@ -81,10 +82,45 @@ module Scrabble =
             if State.playerTurn st = State.playerNumber st
             then 
                 Print.printHand pieces (State.hand st)
-                //debugPrint(printCharsInHand st)
+                debugPrint(printCharsInHand st)
                 (* let bestWordToPlay = findBestWordToPlay (getCharsInHand st) (State.dict st)
                 debugPrint(match bestWordToPlay with | Some word -> word | None -> "No word found") *)
-                debugPrint(string (Dictionary.lookup "ROLE" (State.dict st)))
+                (* debugPrint(string (isValidWord "ROLE" st))
+                debugPrint(string (isValidWord "DROLE" st)) *)
+
+                (* let word = generateAnyFuckingWord st (0,0)
+                printfn "%s" word *)
+
+                let word = generateBestPossibleWord st "" (State.dict st) (0,0) Horizontal
+                printfn "Word: %A" word
+
+                if (isFreshBoard st) then
+                    let parsedWord = parseBotMove st (word, ((0,0), Horizontal))
+                    send cstream (SMPlay parsedWord)
+                    
+
+
+
+                (* match (Dictionary.step 'H' st.dict) with
+                | Some (isWord, children1) -> 
+                    debugPrint (sprintf "Is word: %b" isWord)
+                    match (Dictionary.step 'E' children1) with
+                    | Some (isWord, children2) -> 
+                        debugPrint (sprintf "Is word: %b" isWord)
+                        match (Dictionary.step 'L' children2) with
+                        | Some (isWord, children3) -> 
+                            debugPrint (sprintf "Is word: %b" isWord)
+                            match (Dictionary.step 'L' children3) with
+                            | Some (isWord, children4) -> 
+                                debugPrint (sprintf "Is word: %b" isWord)
+                                match (Dictionary.step 'O' children4) with
+                                | Some (isWord, children5) -> 
+                                    debugPrint (sprintf "Is word: %b" isWord)
+                                | None -> debugPrint "Not a word"
+                            | None -> debugPrint "Not a word"
+                        | None -> debugPrint "Not a word"
+                    | None -> debugPrint "Not a word"
+                | None -> debugPrint "Not a word" *)
                 (* let wordPlacements = generateWordPlacements (getCharsInHand st)
                 wordPlacements
                 |> List.iter (fun (word, coord, dir) -> debugPrint(sprintf "%s %A %A" word coord dir)) *)
@@ -93,10 +129,10 @@ module Scrabble =
                 //let charList = generateFirstPossibleWord (getCharsInHand st) (State.dict st)
                 //Make of fold of the list and then print the word
                 //debugPrint (sprintf "Word: %A" charList)
-                let word = locateLongestWordInADirection st "" (State.dict st) (0,0) Horizontal
-                printfn "Word: %A" word
-                let playableWords = collectAllTheWordsWeCanPlay st
-                printfn "Playable Words: %A" playableWords
+                (* let word = generateBestPossibleWord st "" (State.dict st) (0,0) Horizontal
+                printfn "Word: %A" word *)
+                //let playableWords = collectAllTheWordsWeCanPlay st
+                //printfn "Playable Words: %A" playableWords
                 let input = System.Console.ReadLine();
                 let move = RegEx.parseMove input;
                 send cstream (SMPlay move)

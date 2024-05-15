@@ -12,6 +12,11 @@ module MultiSet
     
     let contains (a: 'a) (M s) = Map.containsKey a s
 
+    let value (M s) (key: 'a) =
+        match Map.tryFind key s with
+        | Some v -> v
+        | None -> 0u
+
     let numItems (a : 'a) (M s) =
         match Map.tryFind a s with
         | Some b -> b
@@ -38,9 +43,11 @@ module MultiSet
     
 
     let ofList (_ : 'a list) : MultiSet<'a> = M Map.empty
-    let toList (_ : MultiSet<'a>) : 'a list = []
+    let toList (ms : MultiSet<'a>) : 'a list =
+        foldBack (fun key value acc -> List.init  (int32 value) (fun _ -> key) @ acc) ms []
 
-    let map (_ : 'a -> 'b) (_ : MultiSet<'a>) : MultiSet<'b> = M Map.empty
+    let map (change : 'a -> 'b) (ms : MultiSet<'a>) : MultiSet<'b> =
+        fold (fun acc key value -> add (change key) value acc) empty ms
 
     let union (a : MultiSet<'a>) (b : MultiSet<'a>) : MultiSet<'a> =
         let f (k : 'a) (v : uint32) (acc : MultiSet<'a>) =
