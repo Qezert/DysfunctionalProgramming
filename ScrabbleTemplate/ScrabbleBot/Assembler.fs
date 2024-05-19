@@ -12,7 +12,6 @@ module internal Assembler
     type Direction =
         | Horizontal
         | Vertical
-        | Center
 
     type Operator =
         | Add
@@ -30,7 +29,7 @@ module internal Assembler
         | _ -> 0
 
     let isFreshBoard st =
-        (st.piecesOnBoard |> Map.isEmpty)
+        (st.piecesOnBoard |> Map.isEmpty) // If there are no pieces on the board, it is a fresh board
 
     let uint32ToChar c =
         char(c + 64u)
@@ -41,12 +40,12 @@ module internal Assembler
     let charToUint32 c =
         uint32(System.Char.ToUpper(c)) - 64u
 
-    let doesTileExist (st : state) (c : coord) =
+    let tileExists (st : state) (c : coord) =
         match (st.board.squares c) with
         | Success _ -> true
         | Failure _ -> false
 
-    let isPieceOnTile st coord =
+    let doesTileHavePiece st coord =
         st.piecesOnBoard |> Map.containsKey coord
 
     let uint32MSToCharMS = 
@@ -74,11 +73,24 @@ module internal Assembler
         | Add       -> (x1 + x2, y1 + y2)
         | Subtract  -> (x1 - x2, y1 - y2)
 
-    let dirToCoord direction =
+    let directionCoord direction =
         match direction with
         | Horizontal    -> (1, 0)
         | Vertical      -> (0, 1)
-        | Center        -> (0, 0)
+
+    let neighboursAreEmpty (st: state) (coord: coord) (direction: Direction) : bool = 
+        let (x, y) = coord
+        match direction with
+        | Horizontal    ->
+            let East = mergeCoords coord (1, 0) Add
+            let North = mergeCoords coord (0, 1) Subtract
+            let South = mergeCoords coord (0, 1) Add
+            if ([East; North; South]) |> List.forall (fun c -> not (doesTileHavePiece st c)) then true else false
+        | Vertical      ->
+            let South = mergeCoords coord (0, 1) Add
+            let East = mergeCoords coord (1, 0) Add
+            let West = mergeCoords coord (1, 0) Subtract
+            if ([South; East; West]) |> List.forall (fun c -> not (doesTileHavePiece st c)) then true else false
 
     let isValidWord (word: string) (st: state) =
         Dictionary.lookup word st.dict
@@ -86,7 +98,7 @@ module internal Assembler
     let scoreWord (word: string) =
         word.Length
     
-    let generateBestPossibleWord (st: state) (initAcc: string) (dict: Dict) (startCoord: coord) (direction: Direction) =
+    let generateBestPossibleWord (st: state) (startCoord: coord) (direction: Direction) : string =
         let rec generateBestPossibleWordAux (acc : string) (hand : MultiSet<uint32>) (dict : Dict) (piecesOnBoard : Map<coord, (char * int)>) (coord : coord) (dir : Direction) =
             
             let start =
@@ -104,19 +116,18 @@ module internal Assembler
                 
                 match (step char dict) with
                 | Some (isWord, children) ->
-                    // Make sure we know which pieces have been used and which are left in our hand:
+
                     let piecesLeftInHand =
                         match (piecesOnBoard.TryFind coord) with
                         | Some _ -> hand
                         | None   -> (MultiSet.removeSingle (charToUint32 char) hand)
                     
-                    let newCoordinate = (mergeCoords coord (dirToCoord direction) Add)
+                    let newCoordinate = (mergeCoords coord (directionCoord direction) Add)
                     let nextWord = generateBestPossibleWordAux currentWord piecesLeftInHand children piecesOnBoard newCoordinate dir
                     
-                    if isWord && currentWord.Length > currentLongestWord.Length && doesTileExist st newCoordinate then 
+                    if isWord && currentWord.Length > currentLongestWord.Length && tileExists st newCoordinate then
                         currentWord
-                    else if nextWord.Length > currentLongestWord.Length 
-                    then
+                    else if nextWord.Length > currentLongestWord.Length && neighboursAreEmpty st newCoordinate dir then
                         nextWord
                     else
                         currentLongestWord
@@ -124,7 +135,82 @@ module internal Assembler
                 | None  -> currentLongestWord
                 ) "" start
             
-        generateBestPossibleWordAux initAcc st.hand dict st.piecesOnBoard startCoord direction
+        generateBestPossibleWordAux "" st.hand st.dict st.piecesOnBoard startCoord direction
+
+    (* let generateBestPossibleWord (st: state) (startCoord: coord) (direction: Direction) : string =
+        let rec generateBestPossibleWordAux (acc : string) (hand : MultiSet<uint32>) (dict : Dict) (piecesOnBoard : Map<coord, (char * int)>) (coord : coord) (dir : Direction) =
+            
+            let start =
+                match (piecesOnBoard.TryFind(coord)) with
+                | Some (char, i)   ->  MultiSet.toList (MultiSet.addSingle (char) MultiSet.empty)
+                | None             ->  MultiSet.toList (uint32MSToCharMS hand)
+            
+            let test = start
+
+            let length = test.Length
+
+            List.fold (fun (currentLongestWord : string) (char : char) ->
+                
+                let currentWord = (acc + char.ToString())
+                
+                match (step char dict) with
+                | Some (isWord, children) ->
+
+                    let piecesLeftInHand =
+                        match (piecesOnBoard.TryFind coord) with
+                        | Some _ -> hand
+                        | None   -> (MultiSet.removeSingle (charToUint32 char) hand)
+                    
+                    let newCoordinate = (mergeCoords coord (directionCoord direction) Add)
+                    let nextWord = generateBestPossibleWordAux currentWord piecesLeftInHand children piecesOnBoard newCoordinate dir
+                    
+                    if isWord && currentWord.Length > currentLongestWord.Length && tileExists st newCoordinate then
+                        currentWord
+                    else if nextWord.Length > currentLongestWord.Length && neighboursAreEmpty st newCoordinate dir then
+                        nextWord
+                    else
+                        currentLongestWord
+                    
+                | None  -> currentLongestWord
+                ) "" start
+            
+        generateBestPossibleWordAux "" st.hand st.dict st.piecesOnBoard startCoord direction *)
+
+    let findBestWordPlacement (st: state) : string * (coord * Direction) =
+        let rec findWordPlacementsAux (acc : string * (coord * Direction)) (piecesOnBoard: Map<coord, (char * int)>) = 
+
+            if (piecesOnBoard |> Map.isEmpty) then acc
+            else 
+
+                let (currentWord, (_, _)) = acc
+
+                let pieceOnBoard = piecesOnBoard |> Map.toList |> List.head
+                let (newCoord, (_, _)) = pieceOnBoard
+
+                if not (doesTileHavePiece st (mergeCoords newCoord (directionCoord Horizontal) Subtract))
+                    then 
+                        let newWord = generateBestPossibleWord st newCoord Horizontal
+                        let piecesLeftOnBoard = piecesOnBoard |> Map.remove newCoord
+
+                        if newWord.Length > currentWord.Length then 
+                            findWordPlacementsAux (newWord, (newCoord, Horizontal)) piecesLeftOnBoard
+                        else
+                            findWordPlacementsAux acc piecesLeftOnBoard
+                elif not (doesTileHavePiece st (mergeCoords newCoord (directionCoord Vertical) Subtract))
+                    then 
+                        let newWord = generateBestPossibleWord st newCoord Vertical
+                        let piecesLeftOnBoard = piecesOnBoard |> Map.remove newCoord
+
+                        if newWord.Length > currentWord.Length then 
+                            findWordPlacementsAux (newWord, (newCoord, Vertical)) piecesLeftOnBoard
+                        else
+                            findWordPlacementsAux acc piecesLeftOnBoard
+                else
+                    let piecesLeftOnBoard = piecesOnBoard |> Map.remove newCoord
+                    findWordPlacementsAux acc piecesLeftOnBoard
+
+        findWordPlacementsAux ("", ((0, 0), Horizontal)) st.piecesOnBoard
+
 
     let parseBotMove (st: state) ((word: string), (initCoord, dir): coord * Direction) : ((int * int) * (uint32 * (char * int))) list =
         let rec parseBotMoveAux (acc: ((int * int) * (uint32 * (char * int))) list) (chars: char list) (coord: coord) (direction: Direction) =
@@ -134,12 +220,12 @@ module internal Assembler
             | x::xs -> 
                 let charUint = charToUint32 x
                 let charVal = charValues x
-                let newCoord = mergeCoords coord (dirToCoord direction) Add
+                let newCoord = mergeCoords coord (directionCoord direction) Add
                 let output = (coord, (charUint, (x, charVal)))
 
-                match (isPieceOnTile st coord) with
+                match (doesTileHavePiece st coord) with
                 | true  ->
-                    parseBotMoveAux acc xs (mergeCoords coord (dirToCoord direction) Add) direction
+                    parseBotMoveAux acc xs (mergeCoords coord (directionCoord direction) Add) direction
                 | false ->
                     parseBotMoveAux (output::acc) xs newCoord direction
                     

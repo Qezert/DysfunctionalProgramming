@@ -1,6 +1,7 @@
 ﻿
 namespace DysBot
 open Assembler
+open MultiSet
 open State
 open ScrabbleUtil
 open ScrabbleUtil.ServerCommunication
@@ -55,6 +56,14 @@ module State =
         match st.playerTurn with
         | n when n = numPlayers -> 1u
         | _ -> st.playerTurn + 1u
+
+    let updatePiecesOnBoard (ms) (piecesOnBoard: Map<coord, (char * int)>) : Map<coord, (char * int)> =
+                        let rec updatedPiecesOnBoardAux moves currentPieces =
+                            match moves with
+                            | [] -> currentPieces
+                            | ((x, y), (id, (char, point)))::t -> 
+                                updatedPiecesOnBoardAux t (Map.add (x, y) (char, point) currentPieces)
+                        updatedPiecesOnBoardAux ms piecesOnBoard
         
 module Scrabble =
     open System.Threading
@@ -64,78 +73,53 @@ module Scrabble =
             
             //sleep for 1 second
             Thread.Sleep(1000)
-            debugPrint (sprintf "Player %d thinks there are %d players in the game\n" (State.playerNumber st) (State.numPlayers st))
             debugPrint (sprintf "Player %d thinks it's Player %d's turn\n" (State.playerNumber st) (State.playerTurn st))
 
-            (* if (st.playerTurn = st.playerNumber) then
-                if (isFreshBoard) then
-                    let wordToPlay =
-                        parseBotMove *)
 
-
-
-
-
-            
             // remove the force print when you move on from manual input (or when you have learnt the format)
             //forcePrint "Input move (format '(<x-coordinate> <y-coordinate> <piece id><character><point-value> )*', note the absence of space between the last inputs)\n\n"
             if State.playerTurn st = State.playerNumber st
             then 
                 Print.printHand pieces (State.hand st)
                 debugPrint(printCharsInHand st)
-                (* let bestWordToPlay = findBestWordToPlay (getCharsInHand st) (State.dict st)
-                debugPrint(match bestWordToPlay with | Some word -> word | None -> "No word found") *)
-                (* debugPrint(string (isValidWord "ROLE" st))
-                debugPrint(string (isValidWord "DROLE" st)) *)
 
-                (* let word = generateAnyFuckingWord st (0,0)
-                printfn "%s" word *)
+                match isFreshBoard st with
+                | true -> 
+                    let word = generateBestPossibleWord st (0,0) Horizontal
+                    printfn "Player: %d wants to play Word: %s" st.playerNumber word
+                    if not (word = "") then
+                        let parsedWord = parseBotMove st (word, ((0,0), Horizontal))
+                        send cstream (SMPlay parsedWord)
+                    else
+                        send cstream (SMPass)
+                | false ->
+                    let wordAndPlacement = findBestWordPlacement st
+                    let (word, (coord, direction)) = wordAndPlacement
+                    printfn "Player: %d wants to play Word: %s" st.playerNumber word
+                    if not (word = "") then
+                        let parsedWord = parseBotMove st (word, (coord, direction))
+                        send cstream (SMPlay parsedWord)
+                    else
+                        send cstream (SMPass)
 
-                let word = generateBestPossibleWord st "" (State.dict st) (0,0) Horizontal
-                printfn "Word: %A" word
+                printfn "End of Play: Player: %d\n" (State.playerNumber st)
 
-                if (isFreshBoard st) then
-                    let parsedWord = parseBotMove st (word, ((0,0), Horizontal))
-                    send cstream (SMPlay parsedWord)
-                    
+// ///////////////////////////////////////////////////////////////////                                    
+// ///////////////////////////////////////////////////////////////////  
+// ///////////////////////////////////////////////////////////////////                 
+// //////////////                                     ////////////////                  
+// //////////////           DELETE ALL PRINT          ////////////////      
+// //////////////             STATEMENTS              ////////////////                     
+// //////////////                                     ////////////////                      
+// //////////////                                     ////////////////          
+// //////////////                                     ////////////////                         
+// ///////////////////////////////////////////////////////////////////                          
+// ///////////////////////////////////////////////////////////////////              
+// ///////////////////////////////////////////////////////////////////                             
 
-
-
-                (* match (Dictionary.step 'H' st.dict) with
-                | Some (isWord, children1) -> 
-                    debugPrint (sprintf "Is word: %b" isWord)
-                    match (Dictionary.step 'E' children1) with
-                    | Some (isWord, children2) -> 
-                        debugPrint (sprintf "Is word: %b" isWord)
-                        match (Dictionary.step 'L' children2) with
-                        | Some (isWord, children3) -> 
-                            debugPrint (sprintf "Is word: %b" isWord)
-                            match (Dictionary.step 'L' children3) with
-                            | Some (isWord, children4) -> 
-                                debugPrint (sprintf "Is word: %b" isWord)
-                                match (Dictionary.step 'O' children4) with
-                                | Some (isWord, children5) -> 
-                                    debugPrint (sprintf "Is word: %b" isWord)
-                                | None -> debugPrint "Not a word"
-                            | None -> debugPrint "Not a word"
-                        | None -> debugPrint "Not a word"
-                    | None -> debugPrint "Not a word"
-                | None -> debugPrint "Not a word" *)
-                (* let wordPlacements = generateWordPlacements (getCharsInHand st)
-                wordPlacements
-                |> List.iter (fun (word, coord, dir) -> debugPrint(sprintf "%s %A %A" word coord dir)) *)
-                //let words = generatePossibleWords (getCharsInHand st) (State.dict st)
-                //printfn "Words: %A" words
-                //let charList = generateFirstPossibleWord (getCharsInHand st) (State.dict st)
-                //Make of fold of the list and then print the word
-                //debugPrint (sprintf "Word: %A" charList)
-                (* let word = generateBestPossibleWord st "" (State.dict st) (0,0) Horizontal
-                printfn "Word: %A" word *)
-                //let playableWords = collectAllTheWordsWeCanPlay st
-                //printfn "Playable Words: %A" playableWords
-                let input = System.Console.ReadLine();
-                let move = RegEx.parseMove input;
-                send cstream (SMPlay move)
+                //let input = System.Console.ReadLine();
+                //let move = RegEx.parseMove input;
+                //send cstream (SMPlay move)
                 //send cstream SMPass
                 debugPrint (sprintf "Player %d made a move\n" (State.playerNumber st))
             //debugPrint (sprintf "Player %d -> Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
@@ -150,11 +134,13 @@ module Scrabble =
                     let updatedHand =
                         ms
                         |> List.fold (fun acc (coord, (id, (char, point))) -> MultiSet.removeSingle id acc) st.hand // Remove old tiles
-                        |> MultiSet.union NewPiecesMS                                                               // Add new pieces
+                        |> MultiSet.union NewPiecesMS
+                        
                     {
                     st with 
                         playerTurn = nextTurn st st.numPlayers
                         hand = updatedHand
+                        piecesOnBoard = updatePiecesOnBoard ms st.piecesOnBoard
                     }
                 aux st'
             | RCM (CMPlayed (pid, ms, points)) ->
@@ -163,6 +149,7 @@ module Scrabble =
                     {
                     st with 
                         playerTurn = nextTurn st st.numPlayers
+                        piecesOnBoard = updatePiecesOnBoard ms st.piecesOnBoard
                     }
                 aux st'
             | RCM (CMPlayFailed (pid, ms)) ->
