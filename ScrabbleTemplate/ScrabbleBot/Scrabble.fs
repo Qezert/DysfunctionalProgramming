@@ -35,15 +35,7 @@ module State =
     // Currently, it only keeps track of your hand, your player numer, your board, and your dictionary,
     // but it could, potentially, keep track of other useful
     // information, such as number of players, player turn, etc.
-    (* type state = {
-        board         : Parser.board
-        dict          : ScrabbleUtil.Dictionary.Dict
-        numPlayers    : uint32
-        playerNumber  : uint32
-        playerTurn    : uint32
-        hand          : MultiSet.MultiSet<uint32>
-        piecesOnBoard : Map<coord, (char * int)>
-    } *)
+    
     let mkState b d pn h num pt = {board = b; dict = d;  playerNumber = pn; hand = h; numPlayers = num; playerTurn = pt; piecesOnBoard = Map.empty}
     let board st         = st.board
     let dict st          = st.dict
@@ -70,62 +62,31 @@ module Scrabble =
     open State
     let playGame cstream pieces (st : State.state) =
         let rec aux (st : State.state) =
-            
-            //sleep for 1 second
-            Thread.Sleep(1000)
-            debugPrint (sprintf "Player %d thinks it's Player %d's turn\n" (State.playerNumber st) (State.playerTurn st))
-
 
             // remove the force print when you move on from manual input (or when you have learnt the format)
             //forcePrint "Input move (format '(<x-coordinate> <y-coordinate> <piece id><character><point-value> )*', note the absence of space between the last inputs)\n\n"
             if State.playerTurn st = State.playerNumber st
             then 
-                Print.printHand pieces (State.hand st)
-                debugPrint(printCharsInHand st)
-
                 match isFreshBoard st with
                 | true -> 
                     let word = generateBestPossibleWord st (0,0) Horizontal
-                    printfn "Player: %d wants to play Word: %s" st.playerNumber word
-                    if not (word = "") then
-                        let parsedWord = parseBotMove st (word, ((0,0), Horizontal))
-                        send cstream (SMPlay parsedWord)
+                    let parsedWord = parseBotMove st (word, ((0,0), Horizontal))
+                    if parsedWord |> List.isEmpty then
+                        send cstream SMPass
                     else
-                        send cstream (SMPass)
+                        send cstream (SMPlay parsedWord)
                 | false ->
                     let wordAndPlacement = findBestWordPlacement st
                     let (word, (coord, direction)) = wordAndPlacement
-                    printfn "Player: %d wants to play Word: %s" st.playerNumber word
-                    if not (word = "") then
-                        let parsedWord = parseBotMove st (word, (coord, direction))
-                        send cstream (SMPlay parsedWord)
+                    let parsedWord = parseBotMove st (word, (coord, direction))
+                    if parsedWord |> List.isEmpty then
+                        send cstream SMPass
                     else
-                        send cstream (SMPass)
+                        send cstream (SMPlay parsedWord)
 
-                printfn "End of Play: Player: %d\n" (State.playerNumber st)
-
-// ///////////////////////////////////////////////////////////////////                                    
-// ///////////////////////////////////////////////////////////////////  
-// ///////////////////////////////////////////////////////////////////                 
-// //////////////                                     ////////////////                  
-// //////////////           DELETE ALL PRINT          ////////////////      
-// //////////////             STATEMENTS              ////////////////                     
-// //////////////                                     ////////////////                      
-// //////////////                                     ////////////////          
-// //////////////                                     ////////////////                         
-// ///////////////////////////////////////////////////////////////////                          
-// ///////////////////////////////////////////////////////////////////              
-// ///////////////////////////////////////////////////////////////////                             
-
-                //let input = System.Console.ReadLine();
-                //let move = RegEx.parseMove input;
-                //send cstream (SMPlay move)
-                //send cstream SMPass
-                debugPrint (sprintf "Player %d made a move\n" (State.playerNumber st))
-            //debugPrint (sprintf "Player %d -> Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
             
             let msg = recv cstream
-            //debugPrint (sprintf "Player %d <- Server:\n%A\n" (State.playerNumber st) move) // keep the debug lines. They are useful.
+
             match msg with
             | RCM (CMPlaySuccess(ms, points, newPieces)) ->
                 (* Successful play by you. Update your state (remove old tiles, add the new ones, change turn, etc) *)
@@ -178,7 +139,6 @@ module Scrabble =
                 ()
             | RCM a -> failwith (sprintf "not implmented: %A" a)
             | RGPE err -> 
-                printfn "Gameplay Error:\n%A" err
                 let st' =
                     {
                     st with 
